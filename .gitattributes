@@ -1,0 +1,4 @@
+*.cmd text eol=crlf
+mvnw text eol=lf
+*.jar binary
+*.bundle binary

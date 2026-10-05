@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.example</groupId>
+    <artifactId>skeleton-starter-vaadin-swing-bridge-javafx</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <!-- The Spring Boot parent derives maven.compiler.release from
+             java.version; setting maven.compiler.source alone has no effect. -->
+        <java.version>21</java.version>
+        <vaadin.version>25.2.2</vaadin.version>
+        <!-- Vaadin Swing Bridge, which the JavaFX extension builds on. Use the
+             version the extension release was built against (1.3.0 for
+             1.0): the extension uses Swing Bridge internals that can change
+             between versions. -->
+        <swing-bridge.version>1.3.0</swing-bridge.version>
+        <swing-bridge-javafx.version>1.0-SNAPSHOT</swing-bridge-javafx.version>
+        <!-- OpenJFX 21.x runs on JDK 21 and newer; OpenJFX 23 and newer need
+             JDK 23 or newer. -->
+        <openjfx.version>21.0.8</openjfx.version>
+        <!-- Where the build puts the platform-specific OpenJFX jars and the
+             two bridge jars the JVM flags below point at. -->
+        <javafx.modules.dir>${project.build.directory}/javafx-modules</javafx.modules.dir>
+        <javafx.bridge.dir>${project.build.directory}/javafx-bridge</javafx.bridge.dir>
+    </properties>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.0</version>
+        <relativePath/>
+    </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-bom</artifactId>
+                <version>${vaadin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Vaadin Swing Bridge (commercial; needs a Swing Bridge license). -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>swing-bridge-flow</artifactId>
+            <version>${swing-bridge.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- The JavaFX extension. Also brings in its two JVM-level jars
+             (swing-bridge-javafx-patch, swing-bridge-javafx-graphics). -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>swing-bridge-javafx-flow</artifactId>
+            <version>${swing-bridge-javafx.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <!-- Replace artifactId with vaadin-core to use only free components -->
+            <artifactId>vaadin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- JavaFX runs from the module path (see jvmArguments below), never
+             from the class path: provided scope keeps it out of the fat jar,
+             and the platform-specific jars are copied to javafx.modules.dir.
+             Add javafx-fxml, javafx-web etc. here if your application uses
+             them, and to add-modules below. -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${openjfx.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>spring-boot:run</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <version>${vaadin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-frontend</goal>
+                            <goal>build-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- The platform-specific OpenJFX jars, for the module path. -->
+                        <id>copy-javafx-modules</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <includeGroupIds>org.openjfx</includeGroupIds>
+                            <classifier>${javafx.platform}</classifier>
+                            <outputDirectory>${javafx.modules.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- The patch and the boot class path jar, at stable names. -->
+                        <id>copy-javafx-bridge</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <includeArtifactIds>swing-bridge-javafx-patch,swing-bridge-javafx-graphics</includeArtifactIds>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${javafx.bridge.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Keeps OpenJFX off the class path of spring-boot:run and
+                         out of the fat jar: it must only be on the module path. -->
+                    <excludeGroupIds>org.openjfx</excludeGroupIds>
+                    <!-- All JVM flags as one space-separated string. Do not put
+                         XML comments inside the element: its content is passed
+                         to the JVM verbatim.
+                         The last line is the debug agent for `mvn
+                         spring-boot:run` — attach an IDE debugger to
+                         localhost:5005. It is bound to loopback on purpose;
+                         `address=*:5005` would accept connections from the
+                         network. -->
+                    <jvmArguments>
+                        --module-path ${javafx.modules.dir}
+                        --add-modules javafx.controls
+                        --patch-module javafx.graphics=${javafx.bridge.dir}/swing-bridge-javafx-patch.jar
+                        -Xbootclasspath/a:${javafx.bridge.dir}/swing-bridge-javafx-graphics.jar
+                        --add-reads javafx.graphics=ALL-UNNAMED,java.logging
+                        --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
+                        --add-exports=javafx.graphics/com.sun.glass.ui.vaadin=ALL-UNNAMED
+                        --add-exports=javafx.graphics/com.sun.glass.events=ALL-UNNAMED
+                        --add-exports=javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED
+                        --add-exports=javafx.graphics/com.sun.prism=ALL-UNNAMED
+                        --enable-native-access=javafx.graphics
+                        --add-opens=java.base/java.lang=ALL-UNNAMED
+                        -Dglass.platform=Vaadin
+                        -Dprism.order=sw
+                        -XX:+UseStringDeduplication
+                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:5005
+                    </jvmArguments>
+                    <!-- JVM -D system properties -->
+                    <systemPropertyVariables>
+                        <!-- Directory scanned for the JavaFX application's JARs.
+                             Defaults to applibs/ next to the project. -->
+                        <!--<applibs.dir>${project.basedir}/some-lib-dir</applibs.dir>-->
+                        <!-- Bridge tuning. All optional; the defaults below are
+                             what you get if you leave these commented out. -->
+                        <!-- Screen size reported to the JavaFX application
+                             (javafx.stage.Screen): per-user (default) or a fixed
+                             <width>x<height>. -->
+                        <!--<swingbridge.screenSize>per-user</swingbridge.screenSize>-->
+                        <!-- Render at the browser's device pixel ratio for crisp
+                             text on HiDPI displays: off (default), auto, or a
+                             decimal such as 2. Costs heap per window. -->
+                        <!--<swingbridge.hidpi>auto</swingbridge.hidpi>-->
+                        <!-- The canvas takes browser focus when it appears, so
+                             typing works without clicking it first. Default true. -->
+                        <!--<swingbridge.javafx.autoFocusOnAttach>true</swingbridge.javafx.autoFocusOnAttach>-->
+                        <!-- Milliseconds between frame updates sent to the
+                             browser (minimum 71). Default 100. -->
+                        <!--<swingbridge.javafx.frameUpdateInterval>100</swingbridge.javafx.frameUpdateInterval>-->
+                        <!-- Hide the exception details the launch-failure view
+                             shows when the JavaFX application cannot start. -->
+                        <!--<swingbridge.errorReporting.enabled>false</swingbridge.errorReporting.enabled>-->
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- OpenJFX platform classifiers, selected by the OS the build runs
+             on. Build on the platform you deploy to, or set
+             -Djavafx.platform=linux (mac, mac-aarch64, linux-aarch64, win). -->
+        <profile>
+            <id>javafx-mac-aarch64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <javafx.platform>mac-aarch64</javafx.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>javafx-mac-x64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <properties>
+                <javafx.platform>mac</javafx.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>javafx-linux-x64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>linux</name>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <javafx.platform>linux</javafx.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>javafx-linux-aarch64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>linux</name>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <javafx.platform>linux-aarch64</javafx.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>javafx-win</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <javafx.platform>win</javafx.platform>
+            </properties>
+        </profile>
+    </profiles>
+</project>
