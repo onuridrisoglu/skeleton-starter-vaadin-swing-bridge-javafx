@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-swing-bridge-javafx</artifactId>
+    <version>1.0.0-alpha1</version>
+  </parent>
+  <artifactId>swing-bridge-javafx-patch</artifactId>
+  <name>Vaadin Swing Bridge JavaFX Patch</name>
+  <description>Glass platform ("Vaadin") patched into the javafx.graphics module with --patch-module</description>
+
+  <licenses>
+    <license>
+      <name>GPL-2.0-only WITH Classpath-exception-2.0</name>
+      <url>https://spdx.org/licenses/GPL-2.0-only.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <properties>
+    <spotless.license-header>${maven.multiModuleProjectDirectory}/eclipse/gpl-v2-cpe.txt</spotless.license-header>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>swing-bridge-javafx-graphics</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- Compile-time only: the classes are patched into the runtime's javafx.graphics. -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!-- Override parent: GPL requires distributing real sources -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>license-sources-jar</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>license-javadoc-jar</id>
+                <phase>none</phase>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <!--
+        A JDK that bundles JavaFX (Azul Zulu FX, BellSoft Liberica Full) has
+        javafx.graphics in its system image, so javac resolves javafx.stage.Screen
+        to the module's class and refuses this module's replacement ("Screen()
+        has private access"). Compiling the sources as a patch of that module
+        (the same way the jar is used at run time) makes them part of it. On a
+        plain JDK the module comes from the javafx-graphics jar on the class
+        path and needs none of this.
+      -->
+      <id>javafx-in-jdk</id>
+      <activation>
+        <file>
+          <exists>${java.home}/lib/javafx.properties</exists>
+        </file>
+      </activation>
+      <properties>
+        <!--
+          javac refuses to add read edges to a system module under "release",
+          so this profile compiles with source/target instead. The platform
+          classes come from the very JDK the patch is compiled against anyway.
+        -->
+        <maven.compiler.release/>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <compilerArgs>
+                <arg>--patch-module</arg>
+                <arg>javafx.graphics=${project.basedir}/src/main/java</arg>
+                <arg>--add-modules</arg>
+                <arg>java.logging</arg>
+                <arg>--add-reads</arg>
+                <arg>javafx.graphics=ALL-UNNAMED,java.logging</arg>
+              </compilerArgs>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

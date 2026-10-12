@@ -1,7 +1,7 @@
 # Vaadin Swing Bridge: JavaFX starter
 
 ## Overview
-This minimal skeleton shows how to use the [**JavaFX Extension for Vaadin Swing Bridge**](https://github.com/vaadin/vaadin-javafx-bridge) to run an existing JavaFX application inside a **Vaadin** application, so that end users can reach it through the web in no time.
+This minimal skeleton shows how to use the **JavaFX Extension for Vaadin Swing Bridge** to run an existing JavaFX application inside a **Vaadin** application, so that end users can reach it through the web in no time.
 
 It runs **WarehousePro**, a sample JavaFX inventory application, whose jar is in `applibs/`. Every browser session gets its own instance of the application. Sign in with `admin / admin` or `manager / manager`.
 
@@ -28,6 +28,9 @@ It is also possible to configure this in the `pom.xml`. There is a commented pla
 The JavaFX extension builds on Vaadin Swing Bridge, so `pom.xml` declares both: `swing-bridge-flow` (Swing Bridge, version `swing-bridge.version`) and `swing-bridge-javafx-flow` (the extension). Swing Bridge is a commercial product and needs a Swing Bridge license.
 
 Keep `swing-bridge.version` at the version the extension release was built against (1.3.0 for this release): the extension uses Swing Bridge internals that can change between versions.
+
+### repo
+The JavaFX extension (`1.0.0-alpha1`) is not published to a public Maven repository yet. Its jars and poms are in `repo/`, a Maven repository inside this project, which `pom.xml` declares under `<repositories>`; everything else comes from Maven Central. If you start a project of your own instead of copying this one, copy `repo/` next to your `pom.xml` and add the same `<repository>` entry.
 
 Unlike the Swing starter, no `java.desktop` patch and no Swing Bridge jars on the boot class path are needed; JavaFX does not render through AWT.
 
@@ -61,12 +64,10 @@ Keep in mind that every user's application runs in the same JVM:
 - Never call `System.exit()` or `Platform.exit()`; close the window instead.
 - The primary stage fills the page in the browser; any other stage opens as a dialog.
 
-See [Writing applications for the bridge](https://github.com/vaadin/vaadin-javafx-bridge#writing-applications-for-the-bridge) for the details.
-
 ## Configuring the bridge
 The bridge reads its optional settings from JVM system properties. The `<systemPropertyVariables>` section of the `pom.xml` lists them as commented-out entries with a one-line explanation each: screen size, HiDPI rendering, keyboard focus, frame interval, and the launch-failure error view. Uncomment what you need.
 
-All settings are described in the extension's [Configuration](https://github.com/vaadin/vaadin-javafx-bridge#configuration) section. `swingbridge.screenSize`, `swingbridge.hidpi` and `swingbridge.errorReporting.enabled` work as in Swing Bridge; see also the [Swing Bridge documentation](https://vaadin.com/docs/latest/tools/modernization-toolkit/swing-bridge/configuration).
+`swingbridge.screenSize`, `swingbridge.hidpi` and `swingbridge.errorReporting.enabled` work as in Swing Bridge; see also the [Swing Bridge documentation](https://vaadin.com/docs/latest/tools/modernization-toolkit/swing-bridge/configuration).
 
 ## Production Build
 Similar to any Spring Boot Vaadin application, you can build it with:
@@ -125,6 +126,5 @@ java ^
 `-XX:+UseStringDeduplication` is optional but recommended: every user's copy of the application holds many equal strings, which the garbage collector then merges.
 
 ## Learn more
-- [JavaFX Extension for Vaadin Swing Bridge](https://github.com/vaadin/vaadin-javafx-bridge): features, configuration and known limitations.
 - [Vaadin Swing Bridge documentation](https://vaadin.com/docs/latest/tools/modernization-toolkit/swing-bridge).
 - [Vaadin documentation](https://vaadin.com/docs/latest).

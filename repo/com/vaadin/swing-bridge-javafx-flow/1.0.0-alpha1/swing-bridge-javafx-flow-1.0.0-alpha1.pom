@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-swing-bridge-javafx</artifactId>
+    <version>1.0.0-alpha1</version>
+  </parent>
+
+  <artifactId>swing-bridge-javafx-flow</artifactId>
+  <name>Vaadin Swing Bridge JavaFX Flow</name>
+  <description>Vaadin Flow component that embeds JavaFX applications in the browser</description>
+
+  <licenses>
+    <license>
+      <name>Vaadin Commercial License and Service Terms</name>
+      <url>https://vaadin.com/commercial-license-and-service-terms</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>license-checker</artifactId>
+    </dependency>
+    <!--
+      Reused, unchanged: the canvas component and its 2D context, the
+      frontend/vaadinswingbridge JS modules (pointer batching, focus adoption,
+      responsive/resize/DPR observers) and the HiDPI render-scale policy.
+      See UPSTREAM.md for exactly what is reused and what is ported.
+    -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>swing-bridge-flow</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j2-impl</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>swing-bridge-javafx-graphics</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>swing-bridge-javafx-patch</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- JavaFX is supplied on the host JVM's module path, never bundled. -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+  </build>
+</project>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-swing-bridge-javafx</artifactId>
+    <version>1.0.0-alpha1</version>
+  </parent>
+  <artifactId>swing-bridge-javafx-graphics</artifactId>
+  <name>Vaadin Swing Bridge JavaFX Graphics</name>
+  <description>Per-session window, pixel and damage bookkeeping shared by the Glass patch and the Flow components.
+    Goes on -Xbootclasspath/a so the patched javafx.graphics module and the web application see the same static state.</description>
+
+  <licenses>
+    <license>
+      <name>Vaadin Commercial License and Service Terms</name>
+      <url>https://vaadin.com/commercial-license-and-service-terms</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <dependencies>
+    <!-- Compile-time only: at runtime JavaFX comes from the module path. -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>

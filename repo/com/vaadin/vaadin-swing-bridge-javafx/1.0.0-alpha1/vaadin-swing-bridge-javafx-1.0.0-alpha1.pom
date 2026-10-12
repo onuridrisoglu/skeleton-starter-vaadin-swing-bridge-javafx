@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-parent</artifactId>
+    <version>3.0.3</version>
+  </parent>
+  <groupId>com.vaadin</groupId>
+  <artifactId>vaadin-swing-bridge-javafx</artifactId>
+  <version>1.0.0-alpha1</version>
+  <packaging>pom</packaging>
+  <name>JavaFX extensions for Vaadin Swing Bridge</name>
+  <description>Run JavaFX applications in the browser using Vaadin Flow, on top of Vaadin Swing Bridge</description>
+
+  <licenses>
+    <license>
+      <name>Vaadin Commercial License and Service Terms</name>
+      <url>https://vaadin.com/commercial-license-and-service-terms</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Vaadin</name>
+      <organization>Vaadin Ltd</organization>
+      <organizationUrl>https://vaadin.com</organizationUrl>
+    </developer>
+  </developers>
+
+  <modules>
+    <module>swing-bridge-javafx-graphics</module>
+    <module>swing-bridge-javafx-patch</module>
+    <module>swing-bridge-javafx-flow</module>
+    <module>simple-javafx-apps</module>
+    <module>swing-bridge-javafx-playground</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <!--
+      The Swing Bridge release this addon is built and tested against. The
+      addon reuses a few of its public-but-internal classes and its frontend
+      modules, so this is pinned to an exact version: see UPSTREAM.md.
+    -->
+    <swing-bridge.version>1.3.0</swing-bridge.version>
+    <vaadin.version>25.2.1</vaadin.version>
+    <!--
+      OpenJFX 21 is the LTS line that runs on the JDK 21 baseline. OpenJFX 23+
+      needs JDK 23+; override with -Dopenjfx.version=25.0.1 on a JDK 25.
+    -->
+    <openjfx.version>21.0.8</openjfx.version>
+    <log4j.version>2.24.3</log4j.version>
+    <spotless.plugin.version>3.1.0</spotless.plugin.version>
+    <spotless.license-header>https://github.com/vaadin/flow/raw/main/eclipse/vaadin-commercial-license-header.txt</spotless.license-header>
+    <junit-jupiter.version>5.10.2</junit-jupiter.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit-jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-bom</artifactId>
+        <version>${vaadin.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>swing-bridge-flow</artifactId>
+        <version>${swing-bridge.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>swing-bridge-graphics</artifactId>
+        <version>${swing-bridge.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-base</artifactId>
+        <version>${openjfx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-graphics</artifactId>
+        <version>${openjfx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>${openjfx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>${openjfx.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <repositories>
+    <repository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>vaadin-prereleases</id>
+      <url>https://maven.vaadin.com/vaadin-prereleases</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>vaadin-prereleases</id>
+      <url>https://maven.vaadin.com/vaadin-prereleases</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.plugin.version}</version>
+        <configuration>
+          <java>
+            <eclipse>
+              <file>https://github.com/vaadin/flow/raw/main/eclipse/VaadinJavaConventions.xml</file>
+            </eclipse>
+            <endWithNewline/>
+            <removeUnusedImports/>
+            <importOrder>
+              <file>https://github.com/vaadin/flow/raw/main/eclipse/flow.importorder</file>
+            </importOrder>
+            <forbidWildcardImports/>
+            <licenseHeader>
+              <file>${spotless.license-header}</file>
+            </licenseHeader>
+          </java>
+          <pom>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+            </sortPom>
+          </pom>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!--
+            Sources and javadoc JARs with only a LICENSE notice.
+            Satisfies Maven Central requirements without exposing source code.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>license-sources-jar</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <classifier>sources</classifier>
+                  <classesDirectory>${maven.multiModuleProjectDirectory}/src/main/resources</classesDirectory>
+                  <includes>
+                    <include>META-INF/LICENSE.txt</include>
+                  </includes>
+                </configuration>
+              </execution>
+              <execution>
+                <id>license-javadoc-jar</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <classifier>javadoc</classifier>
+                  <classesDirectory>${maven.multiModuleProjectDirectory}/src/main/resources</classesDirectory>
+                  <includes>
+                    <include>META-INF/LICENSE.txt</include>
+                  </includes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
